@@ -56,9 +56,17 @@ module.exports = (sequelize) => {
               msg: 'Please provide a value greater than "0" for "year"'
             }
           }
+        },
+        deletedAt: {
+          type: Sequelize.DATEONLY,
+          allowNull: true
         }
       },
-      { sequelize });
+
+      {
+        paranoid: true,//Allows data to remain in database, but not accessible by query
+        sequelize
+      });
 
   return Book;
 };
