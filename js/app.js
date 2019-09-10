@@ -1,6 +1,10 @@
 const express = require('express');
 const app = express();
 const router = express.Router();
+const bodyParser = require('body-parser');
+
+//allows attributes from the form to be read
+app.use(bodyParser.urlencoded({extended: false}));
 
 //SEQUELIZE
 const Sequelize = require('sequelize');
@@ -52,7 +56,32 @@ app.get('/books/new', (req, res) => {
 });
 
 app.post('/books/new', (req, res) => {
+  let newBook = {
+    where: {
+      title: req.body.title,
+      author: req.body.author,
+      genre: req.body.genre,
+      year: req.body.year
+    }
+  };
+  (async () => {
+    await db.sequelize.sync();
 
+    try {
+      Book
+          .findOrCreate(newBook)
+          .success(function (user, created) {
+            alert(`Your book has been added`)
+          })
+    } catch (error) {
+      if (error.name === 'SequelizeValidationError') {
+        const errors = error.errors.map(err => err.message);
+        console.error('Validation errors: ', errors);
+      } else {
+        next(error);
+      }
+    }
+  })();
   res.render('new-book')
 });
 
@@ -63,6 +92,7 @@ app.get('/books/:id', (req, res) => {
 });
 
 app.post('/books/:id', (req, res) => {
+
   res.render('update-book', {id: req.params.id, books})
 });
 
