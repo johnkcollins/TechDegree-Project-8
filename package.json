@@ -1,0 +1,25 @@
+{
+  "name": "techdegree-project-8",
+  "version": "0.1.0",
+  "description": "SQL Library Manager using JavaScript, Node.js, Express, Pug, and SQL ORM Sequelize",
+  "main": "js/app.js",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johnkcollins/TechDegree-Project-8.git"
+  },
+  "bugs": {
+    "url": "https://github.com/johnkcollins/TechDegree-Project-8/issues"
+  },
+  "homepage": "https://github.com/johnkcollins/TechDegree-Project-8#readme",
+  "author": "John Collins, j.k.collins410@gmail.com",
+  "dependencies": {
+    "express": "^4.17.1",
+    "pug": "^2.0.4",
+    "sequelize": "^5.18.4",
+    "sqlite3": "^4.1.0"
+  },
+  "scripts": {
+    "start": "node js/app.js"
+  }
+}
