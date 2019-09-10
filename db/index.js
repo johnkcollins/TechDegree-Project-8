@@ -3,9 +3,6 @@ const Sequelize = require ('sequelize');
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: './db/library.db',
-  define: {
-    timestamps: false
-  },
   logging: false
 });
 
