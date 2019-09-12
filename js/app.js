@@ -18,6 +18,7 @@ const {Book} = db.models;
 let books;
 
 // Retrieves the books from the sqlite database with SEQUELIZE
+
 (async () => {
   await db.sequelize.sync();
 
@@ -48,11 +49,12 @@ app.get('/', (req, res) => {
 });
 
 app.get('/books', (req, res) => {
-  res.render('index', {books})
+  console.log(books);
+  res.render('index', {books});
 });
 
 app.get('/books/new', (req, res) => {
-  res.render('new-book')
+  res.render('new-book');
 });
 
 app.post('/books/new', (req, res) => {
@@ -65,24 +67,19 @@ app.post('/books/new', (req, res) => {
     }
   };
   (async () => {
-    await db.sequelize.sync();
 
     try {
       Book
           .findOrCreate(newBook)
-          .success(function (user, created) {
-            alert(`Your book has been added`)
-          })
+          .then(res.redirect(`/`))
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
         const errors = error.errors.map(err => err.message);
         console.error('Validation errors: ', errors);
-      } else {
-        next(error);
       }
     }
   })();
-  res.render('new-book')
+
 });
 
 app.get('/books/:id', (req, res) => {
@@ -92,16 +89,58 @@ app.get('/books/:id', (req, res) => {
 });
 
 app.post('/books/:id', (req, res) => {
+  let id = parseInt(req.params.id) + 1;
+  const updateBook = {
+    id: req.params.id,
+    title: req.body.title,
+    author: req.body.author,
+    genre: req.body.genre,
+    year: req.body.year
+  };
 
-  res.render('update-book', {id: req.params.id, books})
+  (async () => {
+    try {
+      let bookToUpdate = await Book.findByPk(id);
+      let results = bookToUpdate.update(updateBook);
+    } catch (error) {
+      if (error.name === 'SequelizeValidationError') {
+        const errors = error.errors.map(err => err.message);
+        console.error('Validation errors: ', errors);
+      }
+    }
+  })();
+
+  (req.body.delete)
+      ? res.redirect(`/books/${id}/delete`)
+      : res.redirect(`/books/${id}`);
 });
 
 app.get('/does_not_exist', (req, res) => {
   res.render('page-not-found')
 });
 
+app.get('/books/:id/delete', (req, res) => {
+
+  let id = parseInt(req.params.id);
+  console.log(id);
+  const destroyBook = {id};
+  (async () => {
+    try {
+      let bookToDelete = await Book.findByPk(id);
+      let results = bookToDelete.destroy(destroyBook);
+    } catch (error) {
+      if (error.name === 'SequelizeValidationError') {
+        const errors = error.errors.map(err => err.message);
+        console.error('Validation errors: ', errors);
+      }
+    }
+  })();
+  res.render('delete', {id: req.params.id, books});
+});
+
 app.post('/books/:id/delete', (req, res) => {
-  res.render('delete')
+
+
 });
 
 //Renders the error page
@@ -110,21 +149,9 @@ app.use((err, req, res, next) => {
   res.render('error', {err});
 });
 
-
-// router.get('/', function(req, res) {
-//   models.book.findAll()
-//     .then(function(book){
-//       res.render('index', {
-//         title: "Sequelize: express example",
-//         book: book
-//       });
-//     });
-// });
-
 //Crates a local server for the site to be viewed
 app.listen(3000, () => {
   console.log('The app is listening on port 3000')
 });
 
 module.exports = router;
-
