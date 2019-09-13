@@ -49,7 +49,20 @@ app.get('/', (req, res) => {
 });
 
 app.get('/books', (req, res) => {
-  console.log(books);
+  (async () => {
+    await db.sequelize.sync();
+
+    try {
+      books = await Book.findAll();
+    } catch (error) {
+      if (error.name === 'SequelizeValidationError') {
+        const errors = error.errors.map(err => err.message);
+        console.error('Validation errors: ', errors);
+      } else {
+        throw error;
+      }
+    }
+  })();
   res.render('index', {books});
 });
 
