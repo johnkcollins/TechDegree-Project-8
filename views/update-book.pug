@@ -1,14 +1,21 @@
 extends layout
 
+
+
 block content
+
+    -let book = books[id]
+    -let title = book.title
+    -let author = book.author
+    -let genre = book.genre
+    -let year = book.year
+
+
+
     body
         h1 Update Book
-    form(method="post" action=`/books/${id}/delete` onsubmit="return" confirm=('Do you really want to delete this book?'))
-        -let book = books[(id-1)]
-        -let title = book.title
-        -let author = book.author
-        -let genre = book.genre
-        -let year = book.year
+    form(method="post" action=`/books/${id}` onsubmit="return")
+
 
         p
             label( for="title") Title
@@ -23,9 +30,8 @@ block content
             label( for="year") Year
             input( name="year" type="text" id="year" value=year)
         p
-            input( type="submit" value="Update Book")
-
+            input(type="submit" value="Update Book" name="Update")
         p
             a(class="button" href="/") Cancel
         p
-            input(type="submit" value="Delete Book")
+            input(type="submit" value="Delete Book" name="delete")
