@@ -18,10 +18,8 @@ const {Book} = db.models;
 let books;
 
 // Retrieves the books from the sqlite database with SEQUELIZE
-
 (async () => {
   await db.sequelize.sync();
-
   try {
     books = await Book.findAll();
   } catch (error) {
@@ -51,9 +49,8 @@ app.get('/', (req, res) => {
 app.get('/books', (req, res) => {
   (async () => {
     await db.sequelize.sync();
-
     try {
-      books = await Book.findAll();
+      res.render('index', {books});
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
         const errors = error.errors.map(err => err.message);
@@ -63,7 +60,6 @@ app.get('/books', (req, res) => {
       }
     }
   })();
-  res.render('index', {books});
 });
 
 app.get('/books/new', (req, res) => {
@@ -80,7 +76,6 @@ app.post('/books/new', (req, res) => {
     }
   };
   (async () => {
-
     try {
       Book
           .findOrCreate(newBook)
@@ -92,7 +87,6 @@ app.post('/books/new', (req, res) => {
       }
     }
   })();
-
 });
 
 app.get('/books/:id', (req, res) => {
@@ -122,7 +116,6 @@ app.post('/books/:id', (req, res) => {
       }
     }
   })();
-
   (req.body.delete)
       ? res.redirect(`/books/${id}/delete`)
       : res.redirect(`/books/${id}`);
@@ -133,7 +126,6 @@ app.get('/does_not_exist', (req, res) => {
 });
 
 app.get('/books/:id/delete', (req, res) => {
-
   let id = parseInt(req.params.id);
   console.log(id);
   const destroyBook = {id};
@@ -149,11 +141,6 @@ app.get('/books/:id/delete', (req, res) => {
     }
   })();
   res.render('delete', {id: req.params.id, books});
-});
-
-app.post('/books/:id/delete', (req, res) => {
-
-
 });
 
 //Renders the error page
