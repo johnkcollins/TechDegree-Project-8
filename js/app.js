@@ -115,10 +115,10 @@ app.post('/books/:id', (req, res) => {
         console.error('Validation errors: ', errors);
       }
     }
+    (req.body.delete)
+        ? res.redirect(`/books/${id}/delete`)
+        : res.redirect(`/books/${id}`);
   })();
-  (req.body.delete)
-      ? res.redirect(`/books/${id}/delete`)
-      : res.redirect(`/books/${id}`);
 });
 
 app.get('/does_not_exist', (req, res) => {
@@ -139,8 +139,9 @@ app.get('/books/:id/delete', (req, res) => {
         console.error('Validation errors: ', errors);
       }
     }
+    res.render('delete', {id: req.params.id, books});
   })();
-  res.render('delete', {id: req.params.id, books});
+
 });
 
 //Renders the error page
