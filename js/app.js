@@ -86,7 +86,7 @@ app.post('/books/new', (req, res) => {
         const errors = error.errors.map(err => messages.push(err));
         messages.map(message => console.log(message.message));
         res.render('new-book', {messages});
-        messages = [];
+        messages.length = 0;
       }
     }
   })();
@@ -94,59 +94,55 @@ app.post('/books/new', (req, res) => {
 
 app.get('/books/:id', (req, res) => {
   (books[req.params.id - 1])
-      ? res.render('update-book', {id: req.params.id, books})
+      ? res.render('update-book', {id: req.params.id, books, messages})
       : res.redirect('/does_not_exist')
 });
 
-app.post('/books/:id', (req, res) => {
-  let id = req.params.id;
-  const updateBook = {id};
-  const renderBook = {
-    id,
-    title: req.body.title,
-    author: req.body.author,
-    genre: req.body.genre,
-    year: req.body.year
-  };
-  (async () => {
+app.post('/books/:id', async (req, res) => {
     try {
+      let id = req.params.id;
+      const renderBook = {
+        id,
+        title: req.body.title,
+        author: req.body.author,
+        genre: req.body.genre,
+        year: req.body.year
+      };
       const bookToUpdate = await Book.findByPk(id);
-      await bookToUpdate.update(renderBook)
-          .then(res.redirect(`/books/${id}`));
+      const updatedBook = bookToUpdate.update(renderBook);
+      Promise.all([bookToUpdate, updatedBook].then(res.redirect(`/books/${id}`)));
     } catch (error) {
+      messages.length = 0;
       if (error.name === 'SequelizeValidationError') {
         const errors = error.errors.map(err => messages.push(err.message));
         console.error('Validation errors: ', errors);
       }
     }
-  })();
 });
 
 app.get('/does_not_exist', (req, res) => {
   res.render('page-not-found')
 });
 
-app.post('/books/:id/delete', (req, res) => {
-  let id = req.params.id;
-  const destroyBook = {id};
-  (async () => {
+app.post('/books/:id/delete', async (req, res) => {
     try {
+      let id = req.params.id;
+      const destroyBook = {id};
       const bookToDelete = await Book.findByPk(id);
-      await bookToDelete.destroy(destroyBook)
-          .then(() => res.redirect('/'));
+      const deletedBook = bookToDelete.destroy(destroyBook);
+      Promise.all([bookToDelete, deletedBook].then(res.redirect(`/`)));
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
         const errors = error.errors.map(err => messages.push(err.message));
         console.error('Validation errors: ', errors);
       }
     }
-  })();
 });
 
 app.use((req, res, next) => {
-  const err = new Error("Sorry, something isn't where it's supposed to be....");
+  const err = new Error();
   err.status = 404;
-  err.message = "Something isn't where it's supposed to be....";
+  err.message = "Hmmm, something isn't quite right...Make sure the address is correctly entered";
   next(err);
 });
 
