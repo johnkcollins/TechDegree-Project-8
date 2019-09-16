@@ -3,17 +3,13 @@ const app = express();
 const router = express.Router();
 const bodyParser = require('body-parser');
 const Sequelize = require('sequelize');
+const sequelize = require('../db/index');
 
 //allows attributes from the form to be read
 app.use(bodyParser.urlencoded({extended: false}));
 
 //SEQUELIZE
 const db = require('../db');
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: '../db/library'
-});
-
 const {Book} = db.models;
 let books;
 let messages = [];
@@ -34,8 +30,7 @@ let messages = [];
   }
 })();
 
-//Resets Sequelize sequencing
-sequelize.query("UPDATE SQLITE_SEQUENCE SET SEQ=0");
+
 
 // Sets the view engine
 app.set('view engine', 'pug');
@@ -84,9 +79,8 @@ app.post('/books/new', (req, res) => {
   (async () => {
     try {
       Book
-          .findOrCreate(newBook);
-      let id = Book.findByPk({where: {title: req.body.title}})
-          .then(res.render('update-book'))
+          .findOrCreate(newBook)
+          .then(() => res.redirect('/'));
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
         const errors = error.errors.map(err => messages.push(err.message));
@@ -110,11 +104,11 @@ app.post('/books/:id', (req, res) => {
     genre: req.body.genre,
     year: req.body.year
   };
-
+  let renderBook = Book.findByPk({where: updateBook})
   (async () => {
     try {
       await Book.update(updateBook)
-          .then(res.redirect(`/books/${id}`));
+          .then(res.render('update-book', renderBook));
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
         const errors = error.errors.map(err => messages.push(err.message));
@@ -133,12 +127,13 @@ app.post('/books/:id/delete', (req, res) => {
   const destroyBook = {id};
   (async () => {
     try {
+
       let bookToDelete = await Book.findByPk(id);
       await bookToDelete.destroy(destroyBook)
-          .then(res.render('index'));
+          .then(() => res.redirect('/'));
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
-        const errors = error.errors.map(err => err.message);
+        const errors = error.errors.map(err => messages.push(err.message));
         console.error('Validation errors: ', errors);
       }
     }
