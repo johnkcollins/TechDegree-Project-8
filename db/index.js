@@ -12,6 +12,9 @@ const db = {
   models: {},
 };
 
+//Resets Sequelize sequencing
+sequelize.query("UPDATE SQLITE_SEQUENCE SET SEQ=0");
+
 db.models.Book = require ('./models/Book')(sequelize);
 
 module.exports = db;
