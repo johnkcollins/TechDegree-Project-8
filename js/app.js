@@ -2,20 +2,20 @@ const express = require('express');
 const app = express();
 const router = express.Router();
 const bodyParser = require('body-parser');
+const Sequelize = require('sequelize');
 
 //allows attributes from the form to be read
 app.use(bodyParser.urlencoded({extended: false}));
 
 //SEQUELIZE
-const Sequelize = require('sequelize');
 const db = require('../db');
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: '../db/library'
 });
-const {Op} = Sequelize;
 const {Book} = db.models;
 let books;
+let messages = [];
 
 // Retrieves the books from the sqlite database with SEQUELIZE
 (async () => {
@@ -50,7 +50,8 @@ app.get('/books', (req, res) => {
   (async () => {
     await db.sequelize.sync();
     try {
-      res.render('index', {books});
+      books = await Book.findAll()
+          .then(res.render('index', {books}));
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
         const errors = error.errors.map(err => err.message);
@@ -78,11 +79,13 @@ app.post('/books/new', (req, res) => {
   (async () => {
     try {
       Book
-          .findOrCreate(newBook)
-          .then(res.redirect(`/`))
+          .findOrCreate(newBook);
+      let id = Book.findByPk({where: {title: req.body.title}});
+      console.log(id)
+          .then(res.render('update-book'))
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
-        const errors = error.errors.map(err => err.message);
+        const errors = error.errors.map(err => messages.push(err.message));
         console.error('Validation errors: ', errors);
       }
     }
@@ -90,15 +93,14 @@ app.post('/books/new', (req, res) => {
 });
 
 app.get('/books/:id', (req, res) => {
-  (books[req.params.id])
+  (books[req.params.id - 1])
       ? res.render('update-book', {id: req.params.id, books})
       : res.redirect('/does_not_exist')
 });
 
 app.post('/books/:id', (req, res) => {
-  let id = parseInt(req.params.id) + 1;
+  let id = parseInt(req.params.id);
   const updateBook = {
-    id: req.params.id,
     title: req.body.title,
     author: req.body.author,
     genre: req.body.genre,
@@ -107,17 +109,14 @@ app.post('/books/:id', (req, res) => {
 
   (async () => {
     try {
-      let bookToUpdate = await Book.findByPk(id);
-      let results = bookToUpdate.update(updateBook);
+      await Book.update(updateBook)
+          .then(res.redirect(`/books/${id}`));
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
-        const errors = error.errors.map(err => err.message);
+        const errors = error.errors.map(err => messages.push(err.message));
         console.error('Validation errors: ', errors);
       }
     }
-    (req.body.delete)
-        ? res.redirect(`/books/${id}/delete`)
-        : res.redirect(`/books/${id}`);
   })();
 });
 
@@ -125,23 +124,22 @@ app.get('/does_not_exist', (req, res) => {
   res.render('page-not-found')
 });
 
-app.get('/books/:id/delete', (req, res) => {
-  let id = parseInt(req.params.id);
-  console.log(id);
+app.post('/books/:id/delete', (req, res) => {
+  let id = req.params.id;
   const destroyBook = {id};
   (async () => {
     try {
+      console.log(id, "book to be deleted");
       let bookToDelete = await Book.findByPk(id);
-      let results = bookToDelete.destroy(destroyBook);
+      await bookToDelete.destroy(destroyBook)
+          .then(res.render('delete', {id: req.params.id, books}));
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
         const errors = error.errors.map(err => err.message);
         console.error('Validation errors: ', errors);
       }
     }
-    res.render('delete', {id: req.params.id, books});
   })();
-
 });
 
 //Renders the error page
