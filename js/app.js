@@ -141,6 +141,13 @@ app.post('/books/:id/delete', (req, res) => {
   })();
 });
 
+app.use((req, res, next) => {
+  const err = new Error("Sorry, something isn't where it's supposed to be....");
+  err.status = 404;
+  err.message = "Something isn't where it's supposed to be....";
+  next(err);
+});
+
 //Renders the error page
 app.use((err, req, res, next) => {
   res.status(err.status || 500);
