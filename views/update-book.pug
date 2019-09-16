@@ -15,14 +15,13 @@ block content
     form(method="post" action=`/books/${id}` onsubmit="return")
 
         if messages
-            h2.error Please verify Title and Author have a value
             ul.error
                 each message in messages
                     li= message
 
         p
             label( for="title") Title
-            input( name="title" type="text" id="title" value=title)
+            input( name="title" type="text" id="title" value=title autofocus)
         p
             label( for="author") Author
             input( name="author" type="text" id="author" value=author)
