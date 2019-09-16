@@ -99,18 +99,20 @@ app.get('/books/:id', (req, res) => {
 });
 
 app.post('/books/:id', (req, res) => {
-  let id = parseInt(req.params.id);
-  const updateBook = {
+  let id = req.params.id;
+  const updateBook = {id};
+  const renderBook = {
+    id,
     title: req.body.title,
     author: req.body.author,
     genre: req.body.genre,
     year: req.body.year
   };
-  let renderBook = Book.findByPk({where: updateBook})
   (async () => {
     try {
-      await Book.update(updateBook)
-          .then(res.render('update-book', renderBook));
+      const bookToUpdate = await Book.findByPk(id);
+      await bookToUpdate.update(renderBook)
+          .then(res.redirect(`/books/${id}`));
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
         const errors = error.errors.map(err => messages.push(err.message));
