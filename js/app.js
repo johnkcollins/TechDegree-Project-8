@@ -78,9 +78,8 @@ app.post('/books/new', (req, res) => {
   };
   (async () => {
     try {
-      Book
-          .findOrCreate(newBook)
-          .then(() => res.redirect('/'));
+      await Book.findOrCreate(newBook)
+          .then(() => res.redirect(`/books`));
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
         const errors = error.errors.map(err => messages.push(err.message));
@@ -127,8 +126,7 @@ app.post('/books/:id/delete', (req, res) => {
   const destroyBook = {id};
   (async () => {
     try {
-
-      let bookToDelete = await Book.findByPk(id);
+      const bookToDelete = await Book.findByPk(id);
       await bookToDelete.destroy(destroyBook)
           .then(() => res.redirect('/'));
     } catch (error) {
