@@ -7,9 +7,16 @@ block content
     body
         h1 New Book
         form(method="post" action="/books/new")
+
+            if messages
+                h2.error Please verify Title and Author have a value
+                ul.error
+                    each message in messages
+                        li= message
+
             p
                 label( for="title") Title
-                input( name="title" type="text" id="title")
+                input( name="title" type="text" id="title" autofocus)
 
             p
                 label( for="author") Author
@@ -27,4 +34,4 @@ block content
                 input( type="submit" value="Create New Book")
 
             p
-                a(class="button" href="/") Cancel
+                a(class="button" href="/books") Cancel
