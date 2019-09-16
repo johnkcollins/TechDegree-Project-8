@@ -16,7 +16,7 @@ block content
                 each book in books
                     tr
                         td
-                            a(href=`/books/${book.id - 1}` id=`${book.id - 1}` book=`${book}`)= `${book.title}`
+                            a(href=`/books/${book.id}` id=`${book.id}` book=`${book}`)= `${book.title}`
                         td=`${book.author}`
                         td=`${book.genre}`
                         td=`${book.year}`
