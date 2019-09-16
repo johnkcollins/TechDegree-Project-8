@@ -13,9 +13,11 @@ const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: '../db/library'
 });
+
 const {Book} = db.models;
 let books;
 let messages = [];
+
 
 // Retrieves the books from the sqlite database with SEQUELIZE
 (async () => {
@@ -31,6 +33,9 @@ let messages = [];
     }
   }
 })();
+
+//Resets Sequelize sequencing
+sequelize.query("UPDATE SQLITE_SEQUENCE SET SEQ=0");
 
 // Sets the view engine
 app.set('view engine', 'pug');
@@ -80,8 +85,7 @@ app.post('/books/new', (req, res) => {
     try {
       Book
           .findOrCreate(newBook);
-      let id = Book.findByPk({where: {title: req.body.title}});
-      console.log(id)
+      let id = Book.findByPk({where: {title: req.body.title}})
           .then(res.render('update-book'))
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
@@ -129,10 +133,9 @@ app.post('/books/:id/delete', (req, res) => {
   const destroyBook = {id};
   (async () => {
     try {
-      console.log(id, "book to be deleted");
       let bookToDelete = await Book.findByPk(id);
       await bookToDelete.destroy(destroyBook)
-          .then(res.render('delete', {id: req.params.id, books}));
+          .then(res.render('index'));
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
         const errors = error.errors.map(err => err.message);
