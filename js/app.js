@@ -50,12 +50,13 @@ app.get('/books', (req, res) => {
   (async () => {
     await db.sequelize.sync();
     try {
+      messages = [];
       books = await Book.findAll()
           .then(res.render('index', {books}));
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
         const errors = error.errors.map(err => err.message);
-        console.error('Validation errors: ', errors);
+        console.error('Validation errors: ', messages);
       } else {
         throw error;
       }
@@ -82,8 +83,10 @@ app.post('/books/new', (req, res) => {
           .then(() => res.redirect(`/books`));
     } catch (error) {
       if (error.name === 'SequelizeValidationError') {
-        const errors = error.errors.map(err => messages.push(err.message));
-        console.error('Validation errors: ', errors);
+        const errors = error.errors.map(err => messages.push(err));
+        messages.map(message => console.log(message.message));
+        res.render('new-book', {messages});
+        messages = [];
       }
     }
   })();
