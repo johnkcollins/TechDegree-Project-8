@@ -90,11 +90,11 @@ app.post('/books/new', async (req, res) => {
   }
 });
 
-app.get('/books/:id', (req, res) => {
+app.get('/books/:id', asyncHandler(async (req, res) => {
   (books[req.params.id - 1])
       ? res.render('update-book', {id: req.params.id, books, messages})
       : res.redirect('/does_not_exist')
-});
+}));
 
 app.post('/books/:id', asyncHandler(async (req, res) => {
   let id = req.params.id;
