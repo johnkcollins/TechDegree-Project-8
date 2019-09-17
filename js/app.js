@@ -38,8 +38,9 @@ function asyncHandler(cb) {
     } catch (err) {
       messages.length = 0;
       if (err.name === 'SequelizeValidationError') {
-        const messages = err.errors.map(err => err.message);
+        messages = err.errors.map(err => err.message);
         console.error('Validation errors: ', messages);
+        res.render('error');
       }
     }
   }
@@ -84,7 +85,6 @@ app.post('/books/new', async (req, res) => {
     if (error.name === 'SequelizeValidationError') {
       const messages = error.errors.map(err => (err));
       messages.map(message => console.log(message.message));
-      console.log(messages.message);
       res.render('new-book', {messages});
       messages.length = 0;
     }
