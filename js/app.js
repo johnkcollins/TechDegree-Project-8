@@ -22,8 +22,8 @@ let messages = [];
     books = await Book.findAll();
   } catch (error) {
     if (error.name === 'SequelizeValidationError') {
-      const errors = error.errors.map(err => err.message);
-      console.error('Validation errors: ', errors);
+      const messages = error.errors.map(err => (err));
+      console.error('Validation errors: ', messages);
     } else {
       throw error;
     }
@@ -38,8 +38,8 @@ function asyncHandler(cb) {
     } catch (err) {
       messages.length = 0;
       if (err.name === 'SequelizeValidationError') {
-        const errors = err.errors.map(err => messages.push(err.message));
-        console.error('Validation errors: ', errors);
+        const messages = err.errors.map(err => err.message);
+        console.error('Validation errors: ', messages);
       }
     }
   }
@@ -82,8 +82,9 @@ app.post('/books/new', async (req, res) => {
     res.redirect(`/books`);
   } catch (error) {
     if (error.name === 'SequelizeValidationError') {
-      const errors = error.errors.map(err => messages.push(err));
+      const messages = error.errors.map(err => (err));
       messages.map(message => console.log(message.message));
+      console.log(messages.message);
       res.render('new-book', {messages});
       messages.length = 0;
     }
