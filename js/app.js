@@ -97,26 +97,36 @@ app.get('/books/:id', asyncHandler(async (req, res) => {
       : res.redirect('/does_not_exist')
 }));
 
-app.post('/books/:id', asyncHandler(async (req, res) => {
-  let id = req.params.id;
-  const renderBook = {
-    id,
-    title: req.body.title,
-    author: req.body.author,
-    genre: req.body.genre,
-    year: req.body.year
-  };
-  const bookToUpdate = await Book.findByPk(id);
-  await bookToUpdate.update(renderBook);
-  res.redirect(`/`);
-}));
+app.post('/books/:id', async (req, res) => {
+  try {
+    let id = req.params.id;
+    const renderBook = {
+      id,
+      title: req.body.title,
+      author: req.body.author,
+      genre: req.body.genre,
+      year: req.body.year
+    };
+    const bookToUpdate = await Book.findByPk(id);
+    const updatedBook = await bookToUpdate.update(renderBook);
+    books = await Book.findAll();
+    res.render('update-book', {id: id, books, messages});
+  } catch (error) {
+    if (error.name === 'SequelizeValidationError') {
+      let id = req.params.id;
+      messages = error.errors.map(err => (err));
+      await messages.map(message => console.log(message.message));
+      res.render('update-book', {messages, books, id});
+      messages.length = 0;
+    }
+  }
+});
 
 app.get('/does_not_exist', (req, res) => {
   res.render('page-not-found')
 });
 
-app.post('/books/:id/delete', asyncHandler(
-    async (req, res) => {
+app.post('/books/:id/delete', asyncHandler(async (req, res) => {
       let id = req.params.id;
       const destroyBook = {id};
       const bookToDelete = await Book.findByPk(id);
