@@ -1,24 +1,23 @@
 extends layout
 
 
-
 block content
-
-    -let book = books[id-1]
-    -let title = book.title
-    -let author = book.author
-    -let genre = book.genre
-    -let year = book.year
 
     body
         h1 Update Book
         form(method="post" action=`/books/${id}` onsubmit="return")
 
-            if messages
+            if(messages.length > 0)
                 h2.error Please verify Title and Author have a value
                 ul.error
                     each message in messages
                         li= message.message
+
+            -let book = books[id-1]
+            -let title = book.title
+            -let author = book.author
+            -let genre = book.genre
+            -let year = book.year
 
             p
                 label( for="title") Title
